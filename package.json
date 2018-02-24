@@ -1,0 +1,23 @@
+{
+  "name": "network-broadcast-news",
+  "version": "1.0.0",
+  "description": "A NodeJS broadcast server for the largest media conglomerate in the world",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steveninouye/Network-Broadcast-News.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/steveninouye/Network-Broadcast-News/issues"
+  },
+  "homepage": "https://github.com/steveninouye/Network-Broadcast-News#readme",
+  "dependencies": {
+    "net": "^1.0.2",
+    "stream": "0.0.2"
+  }
+}
