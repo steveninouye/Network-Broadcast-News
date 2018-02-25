@@ -45,18 +45,38 @@ var server = net.createServer(socket => {
       ) {
         socket.write('You have been kicked out');
         message = `${socket.name} has been kicked out for Flooding the channel`;
+        chatGroup.splice(chatGroup.indexOf(socket), 1);
         socket.destroy();
       } else {
         message = `[${socket.name}] : ${data}`;
       }
     }
     if (message) {
-      console.log(message);
-      chatGroup.forEach((e, i) => {
-        if (chatGroup[i] !== socket) {
-          e.write(message);
-        }
-      });
+      //check if message is a private message
+      let splitMessage = data.split(' ');
+      let privateUser = splitMessage.filter(word => word.indexOf('@') === 0);
+
+      if (privateUser.length !== 0) {
+        privateUser = privateUser.map(e => e.slice(1));
+        let privateMessage = splitMessage.filter(
+          word => word.indexOf('@') !== 0
+        );
+        message = privateMessage.join(' ');
+        console.log(`[${socket.name}] : ${data}`);
+
+        chatGroup.forEach((e, i) => {
+          if (privateUser.indexOf(e.name) !== -1) {
+            e.write(`[${socket.name}] : ${message}`);
+          }
+        });
+      } else {
+        console.log(message);
+        chatGroup.forEach((e, i) => {
+          if (chatGroup[i] !== socket) {
+            e.write(message);
+          }
+        });
+      }
     }
   });
 
@@ -77,12 +97,13 @@ var server = net.createServer(socket => {
 
   process.stdin.on('readable', () => {
     let chunk = process.stdin.read();
-    chunk = chunk.replace(/\n/g, '');
     if (chunk !== null) {
+      chunk = chunk.replace(/\n/g, '');
       if (chunk.indexOf('\\kick ') === 0) {
         chatGroup.forEach((e, i) => {
           if (e.name === chunk.slice(6)) {
             e.write('You have been kicked out');
+            chatGroup.splice(chatGroup.indexOf(e), 1);
             e.destroy();
           }
         });
@@ -90,6 +111,7 @@ var server = net.createServer(socket => {
         chatGroup.forEach((e, i) => {
           if (e.Port === chunk.slice(9)) {
             e.write('You have been kicked out');
+            chatGroup.splice(chatGroup.indexOf(e), 1);
             e.destroy();
           }
         });
