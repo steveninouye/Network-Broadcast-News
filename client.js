@@ -2,9 +2,7 @@ const net = require('net');
 process.stdin.setEncoding('utf8');
 
 const server = net.createConnection(6969, '127.0.0.1', socket => {
-  server.Address = server.address().address;
-  server.Port = server.address().port;
-  console.log(server.Port);
+  server.write(server.address().port.toString());
 
   server.on('data', data => {
     console.log(data.toString());

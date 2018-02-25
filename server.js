@@ -5,21 +5,20 @@ let chatGroup = [];
 process.stdin.setEncoding('utf8');
 
 var server = net.createServer(socket => {
-  socket.Address = socket.address().address;
-  socket.Port = socket.address().port;
   chatGroup.push(socket);
-  socket.write(
-    `You are connected on address: ${socket.Address} port: ${
-      socket.Port
-    }\r\nSet Your Username: `
-  );
+  socket.msgArray = [];
 
   socket.on('data', data => {
     let message = false;
     //stake out any new lines from data
     data = data.toString().replace(/\n/g, '');
-
-    if (!socket.name) {
+    if (!socket.Port) {
+      socket.Port = data;
+      socket.write(
+        `You are connected on port: ${socket.Port}\r\nSet Your Username: `
+      );
+      console.log(`New User using port: ${socket.Port}`);
+    } else if (!socket.name) {
       let userExists = false;
       //check if there are any users with that name already
       chatGroup.forEach((e, i) => {
@@ -33,10 +32,23 @@ var server = net.createServer(socket => {
       });
       if (!userExists) {
         socket.name = data;
-        message = `****${socket.name} has signed on****`;
+        console.log(`${socket.name} Signed On Port: ${socket.Port}`);
+        message = `****${socket.name} Has Signed On****`;
       }
     } else {
-      message = `${socket.name} : ${data}`;
+      let time = new Date().getTime();
+      socket.msgArray.push(time);
+      let msgLength = socket.msgArray.length;
+      if (
+        msgLength > 10 &&
+        socket.msgArray[msgLength - 1] - socket.msgArray[msgLength - 10] < 8888
+      ) {
+        socket.write('You have been kicked out');
+        message = `${socket.name} has been kicked out for Flooding the channel`;
+        socket.destroy();
+      } else {
+        message = `[${socket.name}] : ${data}`;
+      }
     }
     if (message) {
       console.log(message);
@@ -77,7 +89,6 @@ var server = net.createServer(socket => {
       } else if (chunk.indexOf('kick ip: ') === 0) {
         chatGroup.forEach((e, i) => {
           if (e.Port === chunk.slice(9)) {
-            console.log(chunk);
             e.write('You have been kicked out');
             e.destroy();
           }
